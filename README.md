@@ -1,3 +1,16 @@
+## UART 收发回环（2026-11-22）
+
+同一块 Artix-7 上实现收+发回环：PC 发一个字节，板子原样发回。
+
+- `uart_rx.v`：接收模块，三拍同步去亚稳态，起始位中点验真，每位中点采样
+- `uart_rx_top.v`：回环顶层，收完立刻请求发送
+- `uart_rx_tb.v`：自检 testbench，连发 55/A5/0F/F0 后打印 PASS
+
+**验证结果**：仿真 `PASS : 4 bytes received correctly`；上板 Hex 发 `0F` 回 `0F`、发 `F0` 回 `F0`。
+
+![回环上板](uart_loopback.png)
+
+**已知限制**：连发两个字节会丢一个 —— 收发之间没有 FIFO 缓冲。
 # FPGA UART 单字节发送模块
 
 Verilog 实现的 UART 发送模块，参数化波特率，带 `Start` / `Tx_Done` 单拍握手。
